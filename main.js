@@ -11,54 +11,102 @@ themeSelector.addEventListener('change', (e) => {
   DOM.switchTheme(selectedTheme);
 });
 
-// Create a container for the demo content
+// Create main container
 const container = DOM.container({ parent: DOM.body, classes: ['mt-4'] });
 
-// Add a header
-const header = DOM.typography('h1', {
+// Add page header
+DOM.typography('h1', {
   parent: container,
-  text: 'Bootswatch Theme Demo',
+  text: 'dom.js Complete Demo',
   classes: ['text-center', 'mb-4'],
 });
 
-// Add a description
-DOM.typography('p', {
+// Create tabs
+const tabsNav = DOM.element('ul', {
   parent: container,
-  text: 'This page demonstrates Bootstrap components using different Bootswatch themes. Use the selector above to switch themes.',
-  classes: ['text-center'],
+  classes: ['nav', 'nav-tabs'],
+  attributes: { role: 'tablist' },
 });
 
-// Create a row for components
-const componentsRow = DOM.row({ parent: container, classes: ['mt-5'] });
+// Tab content container
+const tabContent = DOM.element('div', {
+  parent: container,
+  classes: ['tab-content'],
+});
 
-// Left column
-const leftCol = DOM.col({ parent: componentsRow, size: 6 });
+// Define tabs
+const tabs = [
+  { id: 'overview', title: 'Overview', content: createOverviewContent },
+  { id: 'buttons', title: 'Buttons', content: createButtonsContent },
+  { id: 'forms', title: 'Forms', content: createFormsContent },
+  { id: 'navigation', title: 'Navigation', content: createNavigationContent },
+  { id: 'modals', title: 'Modals', content: createModalsContent },
+  { id: 'components', title: 'Components', content: createComponentsContent },
+  { id: 'theme-switching', title: 'Theme Switching', content: createThemeSwitchingContent },
+  { id: 'dynamic-content', title: 'Dynamic Content', content: createDynamicContent },
+];
 
-// Right column
-const rightCol = DOM.col({ parent: componentsRow, size: 6 });
+// Create tabs and content
+tabs.forEach((tab, index) => {
+  // Create tab nav item
+  const navItem = DOM.element('li', {
+    parent: tabsNav,
+    classes: ['nav-item'],
+    attributes: { role: 'presentation' },
+  });
 
-// Components in the left column
-createButtonsSection(leftCol);
-createAlertsSection(leftCol);
-createCardSection(leftCol);
+  const navLink = DOM.element('button', {
+    parent: navItem,
+    classes: ['nav-link', ...(index === 0 ? ['active'] : [])],
+    attributes: {
+      id: `${tab.id}-tab`,
+      'data-bs-toggle': 'tab',
+      'data-bs-target': `#${tab.id}`,
+      type: 'button',
+      role: 'tab',
+      'aria-controls': tab.id,
+      'aria-selected': index === 0 ? 'true' : 'false',
+    },
+    text: tab.title,
+  });
 
-// Components in the right column
-createFormSection(rightCol);
-createModalSection(rightCol);
-createProgressSection(rightCol);
+  // Create tab pane
+  const tabPane = DOM.element('div', {
+    parent: tabContent,
+    classes: ['tab-pane', 'fade', ...(index === 0 ? ['show', 'active'] : [])],
+    attributes: {
+      id: tab.id,
+      role: 'tabpanel',
+      'aria-labelledby': `${tab.id}-tab`,
+    },
+  });
 
-// Create a new row for the Dynamic Tabs section
-const tabsRow = DOM.row({ parent: container });
+  // Generate content for the tab
+  tab.content(tabPane);
+});
 
-// Create a column that spans the full width
-const tabsCol = DOM.col({ parent: tabsRow, size: 12 });
+// Functions to create content for each tab
 
-// Add the Dynamic Tabs section to the full-width column
-createDynamicTabsSection(tabsCol);
+function createOverviewContent(parent) {
+  DOM.typography('h3', { parent, text: 'Welcome to dom.js', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'dom.js is a lightweight and comprehensive HTML5 DOM wrapper for building Bootstrap 5 components with ease.',
+  });
+  DOM.typography('p', {
+    parent,
+    text: 'This demo showcases various components and features available in dom.js.',
+  });
+}
 
-// Function to create Buttons section
-function createButtonsSection(parent) {
-  const sectionHeader = DOM.typography('h2', { parent, text: 'Buttons', classes: ['mb-3'] });
+function createButtonsContent(parent) {
+  DOM.typography('h3', { parent, text: 'Buttons', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'Create Bootstrap buttons easily using dom.js.',
+  });
+
+  // Button examples
   const buttonGroup = DOM.buttonGroup({ parent });
   ['Primary', 'Secondary', 'Success', 'Danger', 'Warning', 'Info', 'Light', 'Dark'].forEach((type) => {
     const btnClass = `btn-${type.toLowerCase()}`;
@@ -69,24 +117,292 @@ function createButtonsSection(parent) {
       attributes: { type: 'button' },
     });
   });
+
+  // Code sample
+  const codeSample = `
+// Button examples
+const buttonGroup = DOM.buttonGroup({ parent });
+['Primary', 'Secondary', 'Success', 'Danger', 'Warning', 'Info', 'Light', 'Dark'].forEach((type) => {
+  const btnClass = \`btn-\${type.toLowerCase()}\`;
+  DOM.button({
+    parent: buttonGroup,
+    text: type,
+    classes: ['btn', btnClass],
+    attributes: { type: 'button' },
+  });
+});
+  `;
+  displayCodeSample(parent, codeSample);
 }
 
-// Function to create Alerts section
-function createAlertsSection(parent) {
-  const sectionHeader = DOM.typography('h2', { parent, text: 'Alerts', classes: ['mt-5', 'mb-3'] });
-  ['Primary', 'Secondary', 'Success', 'Danger', 'Warning', 'Info', 'Light', 'Dark'].forEach((type) => {
-    const alertClass = `alert-${type.toLowerCase()}`;
-    DOM.alert({
-      parent,
-      text: `This is a ${type.toLowerCase()} alert—check it out!`,
-      classes: [alertClass],
+function createFormsContent(parent) {
+  DOM.typography('h3', { parent, text: 'Forms', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'Create forms and form elements with dom.js.',
+  });
+
+  // Form example
+  const form = DOM.form({ parent });
+
+  // Email input
+  const emailGroup = DOM.formGroup({ parent: form });
+  DOM.element('label', { parent: emailGroup, text: 'Email address', attributes: { for: 'inputEmail' } });
+  DOM.input({
+    parent: emailGroup,
+    attributes: { type: 'email', id: 'inputEmail', placeholder: 'Enter email' },
+  });
+
+  // Password input
+  const passwordGroup = DOM.formGroup({ parent: form });
+  DOM.element('label', { parent: passwordGroup, text: 'Password', attributes: { for: 'inputPassword' } });
+  DOM.input({
+    parent: passwordGroup,
+    attributes: { type: 'password', id: 'inputPassword', placeholder: 'Password' },
+  });
+
+  // Checkbox
+  DOM.checkbox({ parent: form, labelText: 'Remember me', id: 'rememberMe' });
+
+  // Submit button
+  DOM.button({
+    parent: form,
+    text: 'Submit',
+    classes: ['btn', 'btn-primary'],
+    attributes: { type: 'submit' },
+  });
+
+  // Code sample
+  const codeSample = `
+// Form example
+const form = DOM.form({ parent });
+
+// Email input
+const emailGroup = DOM.formGroup({ parent: form });
+DOM.element('label', { parent: emailGroup, text: 'Email address', attributes: { for: 'inputEmail' } });
+DOM.input({
+  parent: emailGroup,
+  attributes: { type: 'email', id: 'inputEmail', placeholder: 'Enter email' },
+});
+
+// Password input
+const passwordGroup = DOM.formGroup({ parent: form });
+DOM.element('label', { parent: passwordGroup, text: 'Password', attributes: { for: 'inputPassword' } });
+DOM.input({
+  parent: passwordGroup,
+  attributes: { type: 'password', id: 'inputPassword', placeholder: 'Password' },
+});
+
+// Checkbox
+DOM.checkbox({ parent: form, labelText: 'Remember me', id: 'rememberMe' });
+
+// Submit button
+DOM.button({
+  parent: form,
+  text: 'Submit',
+  classes: ['btn', 'btn-primary'],
+  attributes: { type: 'submit' },
+});
+  `;
+  displayCodeSample(parent, codeSample);
+}
+
+function createNavigationContent(parent) {
+  DOM.typography('h3', { parent, text: 'Navigation', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'Create navbars and tabs using dom.js.',
+  });
+
+  // Navbar example
+  DOM.navbar({
+    parent,
+    brandText: 'MyApp',
+    brandHref: '#',
+    items: [
+      { text: 'Home', href: '#', active: true },
+      { text: 'About', href: '#' },
+      { text: 'Contact', href: '#' },
+    ],
+  });
+
+  // Tabs example
+  const tabsContainer = DOM.element('div', { parent, classes: ['mt-4'] });
+
+  const tabsNav = DOM.element('ul', {
+    parent: tabsContainer,
+    classes: ['nav', 'nav-tabs'],
+    attributes: { role: 'tablist' },
+  });
+
+  const tabContent = DOM.element('div', {
+    parent: tabsContainer,
+    classes: ['tab-content'],
+  });
+
+  const tabItems = [
+    { id: 'home', title: 'Home', content: '<p>Home content goes here.</p>', active: true },
+    { id: 'profile', title: 'Profile', content: '<p>Profile content goes here.</p>' },
+    { id: 'messages', title: 'Messages', content: '<p>Messages content goes here.</p>' },
+  ];
+
+  tabItems.forEach((tab) => {
+    // Nav link
+    const navItem = DOM.element('li', {
+      parent: tabsNav,
+      classes: ['nav-item'],
+      attributes: { role: 'presentation' },
+    });
+    const navLink = DOM.element('button', {
+      parent: navItem,
+      classes: ['nav-link', ...(tab.active ? ['active'] : [])],
+      attributes: {
+        id: `${tab.id}-tab`,
+        'data-bs-toggle': 'tab',
+        'data-bs-target': `#${tab.id}`,
+        type: 'button',
+        role: 'tab',
+        'aria-controls': tab.id,
+        'aria-selected': tab.active ? 'true' : 'false',
+      },
+      text: tab.title,
+    });
+
+    // Tab pane
+    const tabPane = DOM.element('div', {
+      parent: tabContent,
+      classes: ['tab-pane', 'fade', ...(tab.active ? ['show', 'active'] : [])],
+      attributes: {
+        id: tab.id,
+        role: 'tabpanel',
+        'aria-labelledby': `${tab.id}-tab`,
+      },
+      html: tab.content,
     });
   });
+
+  // Code sample
+  const codeSample = `
+// Navbar
+DOM.navbar({
+  parent,
+  brandText: 'MyApp',
+  brandHref: '#',
+  items: [
+    { text: 'Home', href: '#', active: true },
+    { text: 'About', href: '#' },
+    { text: 'Contact', href: '#' },
+  ],
+});
+
+// Tabs
+const tabsNav = DOM.element('ul', {
+  parent,
+  classes: ['nav', 'nav-tabs'],
+  attributes: { role: 'tablist' },
+});
+
+const tabContent = DOM.element('div', {
+  parent,
+  classes: ['tab-content'],
+});
+
+const tabItems = [
+  { id: 'home', title: 'Home', content: '<p>Home content goes here.</p>', active: true },
+  { id: 'profile', title: 'Profile', content: '<p>Profile content goes here.</p>' },
+  { id: 'messages', title: 'Messages', content: '<p>Messages content goes here.</p>' },
+];
+
+tabItems.forEach((tab) => {
+  // Nav link
+  const navItem = DOM.element('li', {
+    parent: tabsNav,
+    classes: ['nav-item'],
+    attributes: { role: 'presentation' },
+  });
+  const navLink = DOM.element('button', {
+    parent: navItem,
+    classes: ['nav-link', ...(tab.active ? ['active'] : [])],
+    attributes: {
+      id: \`\${tab.id}-tab\`,
+      'data-bs-toggle': 'tab',
+      'data-bs-target': \`#\${tab.id}\`,
+      type: 'button',
+      role: 'tab',
+      'aria-controls': tab.id,
+      'aria-selected': tab.active ? 'true' : 'false',
+    },
+    text: tab.title,
+  });
+
+  // Tab pane
+  const tabPane = DOM.element('div', {
+    parent: tabContent,
+    classes: ['tab-pane', 'fade', ...(tab.active ? ['show', 'active'] : [])],
+    attributes: {
+      id: tab.id,
+      role: 'tabpanel',
+      'aria-labelledby': \`\${tab.id}-tab\`,
+    },
+    html: tab.content,
+  });
+});
+  `;
+  displayCodeSample(parent, codeSample);
 }
 
-// Function to create Card section
-function createCardSection(parent) {
-  const sectionHeader = DOM.typography('h2', { parent, text: 'Card', classes: ['mt-5', 'mb-3'] });
+function createModalsContent(parent) {
+  DOM.typography('h3', { parent, text: 'Modals', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'Create and control modals using dom.js.',
+  });
+
+  // Modal trigger button
+  DOM.button({
+    parent,
+    text: 'Launch Demo Modal',
+    classes: ['btn', 'btn-primary'],
+    attributes: { 'data-bs-toggle': 'modal', 'data-bs-target': '#demoModal' },
+  });
+
+  // Modal
+  DOM.modal({
+    id: 'demoModal',
+    title: 'Modal Title',
+    bodyContent: '<p>Modal body text goes here.</p>',
+    footerContent: '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>',
+  });
+
+  // Code sample
+  const codeSample = `
+// Modal trigger button
+DOM.button({
+  parent,
+  text: 'Launch Demo Modal',
+  classes: ['btn', 'btn-primary'],
+  attributes: { 'data-bs-toggle': 'modal', 'data-bs-target': '#demoModal' },
+});
+
+// Modal
+DOM.modal({
+  id: 'demoModal',
+  title: 'Modal Title',
+  bodyContent: '<p>Modal body text goes here.</p>',
+  footerContent: '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>',
+});
+  `;
+  displayCodeSample(parent, codeSample);
+}
+
+function createComponentsContent(parent) {
+  DOM.typography('h3', { parent, text: 'Components', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'Create various Bootstrap components using dom.js.',
+  });
+
+  // Card example
   const card = DOM.card({ parent, classes: ['mb-3'] });
   DOM.element('img', {
     parent: card,
@@ -101,182 +417,140 @@ function createCardSection(parent) {
     classes: ['card-text'],
   });
   DOM.button({ parent: cardBody, text: 'Go somewhere', classes: ['btn', 'btn-primary'] });
+
+  // Alert example
+  DOM.alert({
+    parent,
+    text: 'This is a success alert—check it out!',
+    classes: ['alert-success', 'mt-4'],
+  });
+
+  // Code sample
+  const codeSample = `
+// Card
+const card = DOM.card({ parent, classes: ['mb-3'] });
+DOM.element('img', {
+  parent: card,
+  classes: ['card-img-top'],
+  attributes: { src: 'https://via.placeholder.com/286x180', alt: 'Card image cap' },
+});
+const cardBody = DOM.element('div', { parent: card, classes: ['card-body'] });
+DOM.typography('h5', { parent: cardBody, text: 'Card Title', classes: ['card-title'] });
+DOM.typography('p', {
+  parent: cardBody,
+  text: "Some quick example text to build on the card title and make up the bulk of the card's content.",
+  classes: ['card-text'],
+});
+DOM.button({ parent: cardBody, text: 'Go somewhere', classes: ['btn', 'btn-primary'] });
+
+// Alert
+DOM.alert({
+  parent,
+  text: 'This is a success alert—check it out!',
+  classes: ['alert-success', 'mt-4'],
+});
+  `;
+  displayCodeSample(parent, codeSample);
 }
 
-// Function to create Form section
-function createFormSection(parent) {
-  const sectionHeader = DOM.typography('h2', { parent, text: 'Form', classes: ['mb-3'] });
-  const form = DOM.form({ parent });
-  // Email input
-  const emailGroup = DOM.formGroup({ parent: form });
-  DOM.element('label', { parent: emailGroup, text: 'Email address', attributes: { for: 'inputEmail' } });
-  DOM.input({
-    parent: emailGroup,
-    attributes: { type: 'email', id: 'inputEmail', placeholder: 'Enter email' },
+function createThemeSwitchingContent(parent) {
+  DOM.typography('h3', { parent, text: 'Theme Switching', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'Switch between different Bootswatch themes at runtime.',
   });
-  // Password input
-  const passwordGroup = DOM.formGroup({ parent: form });
-  DOM.element('label', { parent: passwordGroup, text: 'Password', attributes: { for: 'inputPassword' } });
-  DOM.input({
-    parent: passwordGroup,
-    attributes: { type: 'password', id: 'inputPassword', placeholder: 'Password' },
+
+  DOM.typography('p', {
+    parent,
+    text: 'Use the theme selector at the top right to change themes.',
   });
-  // Checkbox
-  const checkbox = DOM.checkbox({ parent: form, labelText: 'Remember me', id: 'rememberMe' });
-  // Submit button
-  DOM.button({
-    parent: form,
-    text: 'Submit',
-    classes: ['btn', 'btn-primary'],
-    attributes: { type: 'submit' },
-  });
+
+  // Code sample
+  const codeSample = `
+// Handle theme switching
+const themeSelector = document.getElementById('theme-selector');
+themeSelector.addEventListener('change', (e) => {
+  const selectedTheme = e.target.value;
+  DOM.switchTheme(selectedTheme);
+});
+  `;
+  displayCodeSample(parent, codeSample);
 }
 
-// Function to create Modal section
-function createModalSection(parent) {
-  const sectionHeader = DOM.typography('h2', { parent, text: 'Modal', classes: ['mt-5', 'mb-3'] });
-  // Trigger button
+function createDynamicContent(parent) {
+  DOM.typography('h3', { parent, text: 'Dynamic Content', classes: ['mb-3'] });
+  DOM.typography('p', {
+    parent,
+    text: 'Add and remove elements dynamically using dom.js.',
+  });
+
+  // Container for dynamic content
+  const dynamicContainer = DOM.element('div', { parent });
+
+  // Add content button
   DOM.button({
     parent,
-    text: 'Launch Demo Modal',
-    classes: ['btn', 'btn-primary'],
-    attributes: { 'data-bs-toggle': 'modal', 'data-bs-target': '#demoModal' },
-  });
-  // Modal
-  DOM.modal({
-    id: 'demoModal',
-    title: 'Modal Title',
-    bodyContent: '<p>Modal body text goes here.</p>',
-    footerContent: '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>',
-  });
-}
-
-// Function to create Progress section
-function createProgressSection(parent) {
-  const sectionHeader = DOM.typography('h2', { parent, text: 'Progress', classes: ['mt-5', 'mb-3'] });
-  const progress = DOM.progress({ parent, value: 50, max: 100 });
-}
-
-// Function to create Dynamic Tabs section
-function createDynamicTabsSection(parent) {
-  const sectionHeader = DOM.typography('h2', {
-    parent,
-    text: 'Dynamic Tabs',
-    classes: ['mt-5', 'mb-3'],
-  });
-
-  // Container for the tabs and content
-  const tabsContainer = DOM.element('div', { parent });
-
-  let isTabsStyle = true; // Flag to track the current style (tabs or pills)
-
-  // Create the nav element
-  const nav = DOM.element('ul', {
-    parent: tabsContainer,
-    classes: ['nav', 'nav-tabs'],
-    attributes: { role: 'tablist' },
-  });
-
-  // Tab content container
-  const tabContent = DOM.element('div', { parent: tabsContainer, classes: ['tab-content'] });
-
-  // Add initial tab
-  addNewTab('Tab 1', 'This is the content of Tab 1.', true);
-
-  // Controls to add new tabs and switch styles
-  const controlsContainer = DOM.element('div', { parent, classes: ['mt-3'] });
-
-  // Button to add a new tab
-  const addTabButton = DOM.button({
-    parent: controlsContainer,
-    text: 'Add New Tab',
+    text: 'Add Content',
     classes: ['btn', 'btn-primary', 'me-2'],
     events: {
       click: () => {
-        const tabCount = nav.children.length + 1;
-        addNewTab(`Tab ${tabCount}`, `This is the content of Tab ${tabCount}.`);
+        DOM.element('p', { parent: dynamicContainer, text: 'This is dynamically added content.' });
       },
     },
   });
 
-  // Button to switch between tabs and pills
-  const switchStyleButton = DOM.button({
-    parent: controlsContainer,
-    text: 'Switch to Pills',
+  // Clear content button
+  DOM.button({
+    parent,
+    text: 'Clear Content',
     classes: ['btn', 'btn-secondary'],
     events: {
       click: () => {
-        isTabsStyle = !isTabsStyle;
-        switchNavStyle(isTabsStyle);
-        switchStyleButton.textContent = isTabsStyle ? 'Switch to Pills' : 'Switch to Tabs';
+        dynamicContainer.innerHTML = '';
       },
     },
   });
 
-  // Function to add a new tab
-  function addNewTab(title, content, isActive = false) {
-    const tabId = `tab-${nav.children.length + 1}`;
+  // Code sample
+  const codeSample = `
+// Container for dynamic content
+const dynamicContainer = DOM.element('div', { parent });
 
-    // If the new tab is active, deactivate others
-    if (isActive) {
-      Array.from(nav.querySelectorAll('.nav-link')).forEach((link) => {
-        link.classList.remove('active');
-        link.setAttribute('aria-selected', 'false');
-      });
-      Array.from(tabContent.querySelectorAll('.tab-pane')).forEach((pane) => {
-        pane.classList.remove('show', 'active');
-      });
-    }
+// Add content button
+DOM.button({
+  parent,
+  text: 'Add Content',
+  classes: ['btn', 'btn-primary', 'me-2'],
+  events: {
+    click: () => {
+      DOM.element('p', { parent: dynamicContainer, text: 'This is dynamically added content.' });
+    },
+  },
+});
 
-    // Create nav item
-    const navItem = DOM.element('li', {
-      parent: nav,
-      classes: ['nav-item'],
-      attributes: { role: 'presentation' },
-    });
+// Clear content button
+DOM.button({
+  parent,
+  text: 'Clear Content',
+  classes: ['btn', 'btn-secondary'],
+  events: {
+    click: () => {
+      dynamicContainer.innerHTML = '';
+    },
+  },
+});
+  `;
+  displayCodeSample(parent, codeSample);
+}
 
-    // Create nav link as a button
-    const navLink = DOM.element('button', {
-      parent: navItem,
-      classes: ['nav-link'],
-      attributes: {
-        id: `${tabId}-tab`,
-        'data-bs-toggle': 'tab',
-        'data-bs-target': `#${tabId}`,
-        type: 'button',
-        role: 'tab',
-        'aria-controls': tabId,
-        'aria-selected': isActive ? 'true' : 'false',
-      },
-      text: title,
-    });
-
-    // Set active class if needed
-    if (isActive) {
-      navLink.classList.add('active');
-    }
-
-    // Create tab pane
-    const tabPane = DOM.element('div', {
-      parent: tabContent,
-      classes: ['tab-pane', 'fade'],
-      attributes: {
-        id: tabId,
-        role: 'tabpanel',
-        'aria-labelledby': `${tabId}-tab`,
-      },
-      html: `<p>${content}</p>`,
-    });
-
-    // Show the tab pane if it's active
-    if (isActive) {
-      tabPane.classList.add('show', 'active');
-    }
-  }
-
-  // Function to switch between tabs and pills styles
-  function switchNavStyle(isTabs) {
-    nav.classList.remove('nav-tabs', 'nav-pills');
-    nav.classList.add(isTabs ? 'nav-tabs' : 'nav-pills');
-  }
+// Utility function to display code samples
+function displayCodeSample(parent, code) {
+  const pre = DOM.element('pre', { parent, classes: ['code-sample'] });
+  const codeElement = DOM.element('code', {
+    parent: pre,
+    classes: ['language-javascript'],
+    text: code.trim(),
+  });
+  // Highlight the code using Prism.js
+  Prism.highlightElement(codeElement);
 }
