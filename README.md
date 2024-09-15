@@ -8,6 +8,7 @@ A lightweight and comprehensive HTML5 DOM wrapper for building Bootstrap 5 compo
 - Supports all Bootstrap 5 components.
 - Allows runtime switching between Bootswatch themes.
 - Facilitates the creation of complex UIs with minimal code.
+- **Includes `DomEvaluator` for reactive data binding and dynamic content updates.**
 - No dependencies other than Bootstrap and Bootswatch.
 
 ## Installation
@@ -35,13 +36,15 @@ Ensure that you include Bootstrap and the Bootswatch theme of your choice via CD
 <link id="bootswatch-theme" rel="stylesheet" href="">
 ```
 
-### Including dom.js
+### Including dom.js and domEvaluator.js
 
-Include `dom.js` and your `main.js` in your `index.html`:
+Include `dom.js`, `domEvaluator.js`, and your `main.js` in your `index.html`:
 
 ```html
 <!-- dom.js -->
 <script type="module" src="./dom.js"></script>
+<!-- domEvaluator.js -->
+<script type="module" src="./domEvaluator.js"></script>
 <!-- main.js -->
 <script type="module" src="./main.js"></script>
 ```
@@ -50,7 +53,7 @@ Include `dom.js` and your `main.js` in your `index.html`:
 
 ## Examples
 
-Below are examples demonstrating how to use `dom.js` to create Bootstrap components, from simple buttons to complex navigation tabs.
+Below are examples demonstrating how to use `dom.js` and `domEvaluator.js` to create Bootstrap components, from simple buttons to complex forms with reactive data binding.
 
 ### Example 1: Creating a Simple Button
 
@@ -107,7 +110,7 @@ const button = DOM.button({
 
 ---
 
-### Example 2: Creating a Form
+### Example 2: Creating a Form with Reactive Data Binding
 
 #### index.html
 
@@ -117,9 +120,22 @@ _Same as in Example 1._
 
 ```javascript
 import { DOM } from './dom.js';
+import { DomEvaluator } from './domEvaluator.js';
 
 // Set default theme
 DOM.switchTheme('darkly');
+
+// Initialize reactive data object
+const data = {
+  user: {
+    name: '',
+    email: ''
+  }
+};
+
+// Create an instance of DomEvaluator
+const evaluator = DomEvaluator.getInstance();
+evaluator.setData(data);
 
 // Create a container
 const container = DOM.container({ parent: DOM.body, classes: ['mt-5'] });
@@ -127,45 +143,61 @@ const container = DOM.container({ parent: DOM.body, classes: ['mt-5'] });
 // Create a form
 const form = DOM.form({ parent: container });
 
+// Name input
+const nameGroup = DOM.formGroup({ parent: form });
+DOM.element('label', { parent: nameGroup, text: 'Name', attributes: { for: 'inputName' } });
+DOM.input({
+  parent: nameGroup,
+  attributes: {
+    type: 'text',
+    id: 'inputName',
+    placeholder: 'Enter your name',
+    value: data.user.name,
+  },
+  events: {
+    input: (e) => {
+      data.user.name = e.target.value;
+    },
+  },
+});
+
 // Email input
 const emailGroup = DOM.formGroup({ parent: form });
 DOM.element('label', { parent: emailGroup, text: 'Email address', attributes: { for: 'inputEmail' } });
 DOM.input({
   parent: emailGroup,
-  attributes: { type: 'email', id: 'inputEmail', placeholder: 'Enter email' },
+  attributes: {
+    type: 'email',
+    id: 'inputEmail',
+    placeholder: 'Enter email',
+    value: data.user.email,
+  },
+  events: {
+    input: (e) => {
+      data.user.email = e.target.value;
+    },
+  },
 });
 
-// Password input
-const passwordGroup = DOM.formGroup({ parent: form });
-DOM.element('label', { parent: passwordGroup, text: 'Password', attributes: { for: 'inputPassword' } });
-DOM.input({
-  parent: passwordGroup,
-  attributes: { type: 'password', id: 'inputPassword', placeholder: 'Password' },
-});
+// Display the data using {expressions}
+DOM.typography('h4', { parent: container, text: 'Live Preview', classes: ['mt-4'] });
+DOM.typography('p', { parent: container, text: 'Name: {user.name}' });
+DOM.typography('p', { parent: container, text: 'Email: {user.email}' });
 
-// Checkbox
-const checkbox = DOM.checkbox({ parent: form, labelText: 'Remember me', id: 'rememberMe' });
-
-// Submit button
-DOM.button({
-  parent: form,
-  text: 'Submit',
-  classes: ['btn', 'btn-primary'],
-  attributes: { type: 'submit' },
-});
+// Initial evaluation
+evaluator.evaluate();
 ```
 
 **Explanation:**
 
-- **DOM.form**: Creates a form element.
-- **DOM.formGroup**: Wraps inputs in a Bootstrap form group.
-- **DOM.input**: Creates input elements for email and password.
-- **DOM.checkbox**: Creates a checkbox input.
-- **DOM.button**: Adds a submit button to the form.
+- **DomEvaluator**: Used for reactive data binding.
+- **Reactive Inputs**: Input fields update the `data` object on input events.
+- **Live Preview**: Displays data using `{expressions}`, which are updated automatically when `data` changes.
+- **evaluator.evaluate()**: Processes the DOM to replace `{expressions}` with actual data.
 
 ---
 
-### Example 3: Creating a Navbar
+### Example 3: Creating a Navbar with Dynamic Data
 
 #### index.html
 
@@ -175,29 +207,50 @@ _Same as in Example 1._
 
 ```javascript
 import { DOM } from './dom.js';
+import { DomEvaluator } from './domEvaluator.js';
 
 // Set default theme
 DOM.switchTheme('cerulean');
 
-// Create a container
-const container = DOM.container({ parent: DOM.body });
+// Initialize reactive data object
+const data = {
+  user: {
+    name: 'John Doe'
+  }
+};
+
+// Create an instance of DomEvaluator
+const evaluator = DomEvaluator.getInstance();
+evaluator.setData(data);
 
 // Create a navbar
 const navbar = DOM.navbar({
-  parent: container,
-  brandText: 'MyApp',
+  parent: DOM.body,
+  brandText: '{user.name}',
   brandHref: '#',
+  classes: ['navbar', 'navbar-expand-lg', 'navbar-dark', 'bg-dark'],
   items: [
     { text: 'Home', href: '#', active: true },
-    { text: 'About', href: '#' },
-    { text: 'Contact', href: '#' },
+    { text: 'Profile', href: '#' },
+    { text: 'Settings', href: '#' },
   ],
 });
+
+// Initial evaluation
+evaluator.evaluate();
+
+// Simulate data change after 2 seconds
+setTimeout(() => {
+  data.user.name = 'Jane Smith';
+  evaluator.evaluate();
+}, 2000);
 ```
 
 **Explanation:**
 
-- **DOM.navbar**: Creates a responsive Bootstrap navbar with brand and navigation items.
+- **Dynamic Brand Text**: The navbar brand text uses `{user.name}` to display the user's name.
+- **DomEvaluator**: Updates the DOM when `data.user.name` changes.
+- **Simulated Data Change**: After 2 seconds, the user's name changes, and the navbar updates accordingly.
 
 ---
 
@@ -268,7 +321,7 @@ const messagesPane = DOM.element('div', {
 
 ---
 
-### Example 5: Dynamic Tabs with Theme Switching
+### Example 5: Dynamic Content with domEvaluator.js
 
 #### index.html
 
@@ -292,15 +345,26 @@ _Same as in Example 1, but include a theme selector:_
 
 ```javascript
 import { DOM } from './dom.js';
+import { DomEvaluator } from './domEvaluator.js';
 
 // Set default theme
 DOM.switchTheme('darkly');
 
+// Initialize reactive data object
+const data = {
+  theme: 'darkly',
+  dynamicItems: ['Item 1', 'Item 2', 'Item 3'],
+};
+
+// Create an instance of DomEvaluator
+const evaluator = DomEvaluator.getInstance();
+evaluator.setData(data);
+
 // Handle theme switching
 const themeSelector = document.getElementById('theme-selector');
 themeSelector.addEventListener('change', (e) => {
-  const selectedTheme = e.target.value;
-  DOM.switchTheme(selectedTheme);
+  data.theme = e.target.value;
+  DOM.switchTheme(data.theme);
 });
 
 // Create a container
@@ -309,123 +373,60 @@ const container = DOM.container({ parent: DOM.body, classes: ['mt-4'] });
 // Add header
 DOM.typography('h1', {
   parent: container,
-  text: 'Dynamic Tabs Example',
+  text: 'Dynamic Content Example',
   classes: ['text-center', 'mb-4'],
 });
 
-// Create tabs and content
-createDynamicTabsSection(container);
+// Dynamic list rendering
+const listContainer = DOM.element('ul', { parent: container, classes: ['list-group', 'mb-3'] });
 
-function createDynamicTabsSection(parent) {
-  // Container for tabs
-  const tabsContainer = DOM.element('div', { parent });
-
-  // Nav tabs
-  const nav = DOM.element('ul', {
-    parent: tabsContainer,
-    classes: ['nav', 'nav-tabs'],
-    attributes: { role: 'tablist' },
+function renderList() {
+  listContainer.innerHTML = '';
+  data.dynamicItems.forEach((item) => {
+    DOM.element('li', {
+      parent: listContainer,
+      classes: ['list-group-item'],
+      text: item,
+    });
   });
-
-  // Tab content
-  const tabContent = DOM.element('div', { parent: tabsContainer, classes: ['tab-content'] });
-
-  // Initial tab
-  addNewTab('Tab 1', 'Content for Tab 1', true);
-
-  // Add controls
-  const controls = DOM.element('div', { parent, classes: ['mt-3'] });
-
-  // Add tab button
-  DOM.button({
-    parent: controls,
-    text: 'Add New Tab',
-    classes: ['btn', 'btn-primary', 'me-2'],
-    events: {
-      click: () => {
-        const tabCount = nav.children.length + 1;
-        addNewTab(`Tab ${tabCount}`, `Content for Tab ${tabCount}`);
-      },
-    },
-  });
-
-  // Switch style button
-  let isTabs = true;
-  const switchButton = DOM.button({
-    parent: controls,
-    text: 'Switch to Pills',
-    classes: ['btn', 'btn-secondary'],
-    events: {
-      click: () => {
-        isTabs = !isTabs;
-        nav.classList.toggle('nav-tabs', isTabs);
-        nav.classList.toggle('nav-pills', !isTabs);
-        switchButton.textContent = isTabs ? 'Switch to Pills' : 'Switch to Tabs';
-      },
-    },
-  });
-
-  function addNewTab(title, content, isActive = false) {
-    const tabId = `tab-${nav.children.length + 1}`;
-
-    // Deactivate other tabs if the new one is active
-    if (isActive) {
-      deactivateAllTabs();
-    }
-
-    // Create nav item
-    const navItem = DOM.element('li', {
-      parent: nav,
-      classes: ['nav-item'],
-      attributes: { role: 'presentation' },
-    });
-
-    // Create nav link
-    const navLink = DOM.element('button', {
-      parent: navItem,
-      classes: ['nav-link', isActive ? 'active' : ''],
-      attributes: {
-        id: `${tabId}-tab`,
-        'data-bs-toggle': 'tab',
-        'data-bs-target': `#${tabId}`,
-        type: 'button',
-        role: 'tab',
-        'aria-controls': tabId,
-        'aria-selected': isActive ? 'true' : 'false',
-      },
-      text: title,
-    });
-
-    // Create tab pane
-    const tabPane = DOM.element('div', {
-      parent: tabContent,
-      classes: ['tab-pane', 'fade', isActive ? 'show active' : ''],
-      attributes: {
-        id: tabId,
-        role: 'tabpanel',
-        'aria-labelledby': `${tabId}-tab`,
-      },
-      html: `<p>${content}</p>`,
-    });
-  }
-
-  function deactivateAllTabs() {
-    Array.from(nav.querySelectorAll('.nav-link')).forEach((link) => {
-      link.classList.remove('active');
-      link.setAttribute('aria-selected', 'false');
-    });
-    Array.from(tabContent.querySelectorAll('.tab-pane')).forEach((pane) => {
-      pane.classList.remove('show', 'active');
-    });
-  }
+  evaluator.evaluate(listContainer);
 }
+
+renderList();
+
+// Add item button
+DOM.button({
+  parent: container,
+  text: 'Add Item',
+  classes: ['btn', 'btn-primary', 'me-2'],
+  events: {
+    click: () => {
+      const newItem = `Item ${data.dynamicItems.length + 1}`;
+      data.dynamicItems.push(newItem);
+      renderList();
+    },
+  },
+});
+
+// Remove item button
+DOM.button({
+  parent: container,
+  text: 'Remove Item',
+  classes: ['btn', 'btn-secondary'],
+  events: {
+    click: () => {
+      data.dynamicItems.pop();
+      renderList();
+    },
+  },
+});
 ```
 
 **Explanation:**
 
 - **Theme Switching**: Allows users to switch between Bootswatch themes at runtime.
-- **Dynamic Tabs**: Users can add new tabs dynamically.
-- **Switching Between Tabs and Pills**: Users can toggle the style of the navigation.
+- **Reactive Data Binding**: Uses `domEvaluator.js` to reactively update the list when items are added or removed.
+- **Dynamic List Rendering**: The `renderList` function re-renders the list whenever `data.dynamicItems` changes.
 
 ---
 
@@ -456,10 +457,78 @@ The `DOM` class provides methods to create and manipulate DOM elements easily.
 - **DOM.input(options)**: Creates an input element.
 - **DOM.checkbox(options)**: Creates a checkbox input.
 - **DOM.radio(options)**: Creates a radio input.
+- **DOM.typography(tag, options)**: Creates typography elements like headings, paragraphs, etc.
 
 ### Theme Management
 
 - **DOM.switchTheme(themeName)**: Switches the Bootswatch theme at runtime.
+
+---
+
+## DomEvaluator
+
+`domEvaluator.js` provides a way to integrate dynamic data into your DOM using `{}` placeholders, similar to templating in Angular or React.
+
+### Features
+
+- **Reactive Data Binding**: Automatically updates the DOM when data changes.
+- **On-Demand Updates**: Manually trigger DOM updates when needed.
+- **Singleton Instance**: Ensures only one instance of `DomEvaluator` exists.
+- **Safe Expression Evaluation**: Evaluates expressions within the scope of the provided data object.
+
+### Usage
+
+#### Importing DomEvaluator
+
+```javascript
+import { DomEvaluator } from './domEvaluator.js';
+```
+
+#### Setting Up Reactive Data
+
+```javascript
+// Initialize reactive data object
+const data = {
+  user: {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+  },
+};
+
+// Get the singleton instance of DomEvaluator
+const evaluator = DomEvaluator.getInstance();
+
+// Set the data in the evaluator (makes it reactive)
+evaluator.setData(data);
+```
+
+#### Using {expressions} in Your DOM
+
+```javascript
+// Create elements with placeholders
+DOM.typography('h1', {
+  parent: DOM.body,
+  text: 'Hello, {user.name}!',
+});
+
+DOM.typography('p', {
+  parent: DOM.body,
+  text: 'Email: {user.email}',
+});
+
+// Initial evaluation
+evaluator.evaluate();
+```
+
+#### Reactive Updates
+
+When you change the data object, the DOM updates automatically.
+
+```javascript
+data.user.name = 'Jane Smith';
+data.user.email = 'jane.smith@example.com';
+// The DOM automatically reflects these changes
+```
 
 ---
 
@@ -476,3 +545,7 @@ This project is licensed under the MIT License.
 ## Conclusion
 
 `dom.js` provides a powerful and flexible way to build dynamic, themeable web applications using Bootstrap 5 components. By abstracting the DOM manipulation and Bootstrap component creation into simple methods, it allows developers to focus on building features rather than writing repetitive HTML and JavaScript code.
+
+With the addition of `domEvaluator.js`, you can now integrate reactive data binding into your applications, enabling dynamic content updates and a more interactive user experience.
+
+---
