@@ -12,7 +12,7 @@ A lightweight and comprehensive HTML5 DOM wrapper for building Bootstrap 5 compo
 - No dependencies other than Bootstrap and Bootswatch.
 
 ## Installation
-
+(beta)
 Install via npm:
 
 ```bash
