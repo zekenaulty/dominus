@@ -4,8 +4,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: './src/dom.js',
-      name: 'DOMINUS',
-      fileName: 'dominus',
+      name: 'DOMINUSJS',
+      fileName: 'dominusjs',
       formats: ['es', 'umd'],
     },
     rollupOptions: {

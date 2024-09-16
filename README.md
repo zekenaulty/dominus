@@ -16,7 +16,7 @@ A lightweight and comprehensive HTML5 DOM wrapper for building Bootstrap 5 compo
 Install via npm:
 
 ```bash
-npm install dom.js
+npm install dominus-api
 ```
 
 Alternatively, you can include `dom.js` directly in your project by downloading the `dom.js` file and referencing it in your HTML.

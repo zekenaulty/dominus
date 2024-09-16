@@ -1,12 +1,12 @@
 {
-  "name": "dominus",
+  "name": "dominus-api",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",                           
     "build": "vite build --config vite.config.js",  
     "build:gh": "vite build --config vite.config.gh.js",  
     "build:npm": "vite build --config vite.config.npm.js",  
-    "deploy": "gh-pages -d dist",  
+    "deploy": "npm run build:gh && gh-pages -d dist",  
     "prepare": "npm run build:npm"                    
   },
   "devDependencies": {

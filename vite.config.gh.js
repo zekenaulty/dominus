@@ -1,17 +1,18 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/dminus/', // GitHub Pages base path
+  base: '/dominus/', 
+  root: '.', // Root directory is the project root
   build: {
-    outDir: 'dist',
-    lib: {
-      entry: './src/dom.js',
-      name: 'DOMINUS',
-      fileName: 'dominus',
-      formats: ['es', 'umd'],
-    },
     rollupOptions: {
-      external: [], // Add external dependencies here if needed
+      input: {
+        main: './index.html', // Specify the correct entry point
+      },
     },
+    outDir: 'dist', // Output directory
+    emptyOutDir: true, // Ensure the dist directory is cleaned before each build
   },
+  server: {
+    port: 3000, // Dev server port
+  }
 });
